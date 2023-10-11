@@ -1,3 +1,4 @@
 opencv-python
+flask-cors
 flask
 ast

@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import cv2
 import ast
 import random
@@ -8,6 +9,7 @@ from gaze_tracking import GazeTracking
 
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 # Global variables to store the outputs
@@ -126,7 +128,6 @@ threading.Thread(target=webcam_processing).start()
 @app.route('/api/data', methods=['GET'])
 def get_data():
     return jsonify({'output': output, 'distracted_count': distracted_count, 'looking_count': looking_count, 'class_list': random_data})
-    # total looking and total distracted
 
 
 if __name__ == '__main__':
