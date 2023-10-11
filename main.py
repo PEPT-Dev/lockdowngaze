@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 import cv2
 import ast
+import random
 import requests
 import threading
 from gaze_tracking import GazeTracking
@@ -8,15 +9,24 @@ from gaze_tracking import GazeTracking
 
 app = Flask(__name__)
 
+
 # Global variables to store the outputs
 output = None
 distracted_count = 0
 looking_count = 0
+count = 15
 
+random_data = [
+    {"name":"Joshua W",  "status": "", "overall": [12, 3]},
+    {"name":"Tristan J", "status": "", "overall": [13, 2]},
+    {"name":"Issac I",   "status": "", "overall": [10, 5]},
+    {"name":"Mikey G",   "status": "", "overall": [3, 12]},
+    {"name":"Javier W",  "status": "", "overall": [9, 6]},
+]
 
 
 def classify(data: list):
-    global output, distracted_count, looking_count
+    global output, distracted_count, looking_count, count
 
     data = f"{[ast.literal_eval(cord) for cord in data]}"
 
@@ -36,6 +46,29 @@ def classify(data: list):
         elif topMatch['class_name'] == 'Looking':
             looking_count += 1
             output = True
+
+        count += 1
+
+        random_data[0]["status"] = random.choice(["Looking", "Looking", "Looking", "Looking", "Distracted"])
+        random_data[0]["overall"][random.choice([0, 0, 0, 0, 1])] += 1
+        random_data[0]["lookingpercent"] = round(random_data[0]["overall"][0] / count * 100, 0)
+
+        random_data[1]["status"] = random.choice(["Looking", "Looking", "Looking", "Distracted"])
+        random_data[1]["overall"][random.choice([0, 0, 0, 1])] += 1
+        random_data[1]["lookingpercent"] = round(random_data[1]["overall"][0] / count * 100, 0)
+
+        random_data[2]["status"] = random.choice(["Looking", "Looking", "Looking", "Distracted", "Distracted"])
+        random_data[2]["overall"][random.choice([0, 0, 0, 1, 1])] += 1
+        random_data[2]["lookingpercent"] = round(random_data[2]["overall"][0] / count * 100, 0)
+
+        random_data[3]["status"] = random.choice(["Looking", "Distracted", "Distracted", "Distracted", "Distracted"])
+        random_data[3]["overall"][random.choice([0, 1, 1, 1])] += 1
+        random_data[3]["lookingpercent"] = round(random_data[3]["overall"][0] / count * 100, 0)
+
+        random_data[4]["status"] = random.choice(["Looking", "Looking", "Looking", "Distracted", "Distracted"])
+        random_data[4]["overall"][random.choice([0, 0, 0, 1, 1])] += 1
+        random_data[4]["lookingpercent"] = round(random_data[4]["overall"][0] / count * 100, 0)
+
     else:
         response.raise_for_status()
 
@@ -92,7 +125,8 @@ threading.Thread(target=webcam_processing).start()
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
-    return jsonify({'output': output, 'distracted_count': distracted_count, 'looking_count': looking_count})
+    return jsonify({'output': output, 'distracted_count': distracted_count, 'looking_count': looking_count, 'class_list': random_data})
+    # total looking and total distracted
 
 
 if __name__ == '__main__':
